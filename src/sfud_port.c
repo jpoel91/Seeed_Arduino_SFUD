@@ -28,19 +28,64 @@
 
 #include <sfud.h>
 #include <stdarg.h>
+#include"warpper_SPI.h"
 
 static char log_buf[256];
 
+#ifndef SFUD_USING_QSPI
+const int chipSelectPin = 1;
+#endif
 void sfud_log_debug(const char *file, const long line, const char *format, ...);
-
 /**
  * SPI write data then read data
  */
 static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, size_t write_size, uint8_t *read_buf,
         size_t read_size) {
     sfud_err result = SFUD_SUCCESS;
+    sfud_spi *spidev = (sfud_spi *)spi;
     uint8_t send_data, read_data;
+    if (write_size) {
+        SFUD_ASSERT(write_buf);
+    }
+    if (read_size) {
+        SFUD_ASSERT(read_buf);
+    }
+    
+#ifdef SFUD_USING_QSPI
+    if (write_size > 1){
+        if (4 == write_size){
+            uint32_t Address = (write_buf[1] << 16) | (write_buf[2] << 8) | (write_buf[3]);
+            QSPIEraseCommand(write_buf[0],Address);
+        }
+        else if (write_size > 4){
+            uint32_t Address = (write_buf[1] << 16) | (write_buf[2] << 8) | (write_buf[3]);
+            QSPIWriteMemory(Address,write_buf+4,write_size - 4);
+        }
+        else{
+            QSPIWriteCommand(write_buf[0],write_buf+1,write_size-1);
+        }
+    }else if(read_size){
+        QSPIReadCommand(write_buf[0],read_buf,read_size);
+    }
+    else{
+        QSPIRunCommand(write_buf[0]);
+    }
 
+#else
+    SPICsControl(chipSelectPin, LOW);
+    for (size_t i = 0, retry_times; i < write_size + read_size; i++) {
+        if (i < write_size) {
+            send_data = *write_buf++;
+            SPITransfer(send_data);
+        } else {
+            read_data = SPITransfer(SFUD_DUMMY_DATA);
+        }
+        if (i >= write_size) {
+            *read_buf++ = read_data;
+        }        
+    }
+    SPICsControl(chipSelectPin, HIGH);
+#endif /* SFUD_USING_QSPI */  
     /**
      * add your spi write and read code
      */
@@ -55,15 +100,27 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
 static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi_read_cmd_format *qspi_read_cmd_format,
         uint8_t *read_buf, size_t read_size) {
     sfud_err result = SFUD_SUCCESS;
-
+    sfud_spi *spidev = (sfud_spi *)spi;
+    
     /**
      * add your qspi read flash data code
      */
+    if (qspi_read_cmd_format->instruction_lines == 1&& qspi_read_cmd_format->address_lines == 1 \
+        && qspi_read_cmd_format->data_lines == 4){
+        QSPIReadMemory(addr,read_buf,read_size);
+    }else{
+        result = SFUD_ERR_READ;
+        return result;
+    }
 
     return result;
+
 }
 #endif /* SFUD_USING_QSPI */
-
+/*1s delay */
+static void retry_delay_1s(void) {
+    delay(1000);
+}
 sfud_err sfud_spi_port_init(sfud_flash *flash) {
     sfud_err result = SFUD_SUCCESS;
 
@@ -81,7 +138,19 @@ sfud_err sfud_spi_port_init(sfud_flash *flash) {
      *    flash->retry.delay = null;
      *    flash->retry.times = 10000; //Required
      */
-
+#ifdef SFUD_USING_QSPI
+    QSPIBegin();
+    QSPISetClockSpeed(min(SFUD_W25Q32_MAX_SPEED,VARIANT_GCLK2_FREQ));
+#else
+    SPIBegin();
+    SPICsInit(chipSelectPin, OUTPUT);
+#endif
+    flash->spi.wr = spi_write_read;
+#ifdef SFUD_USING_QSPI
+    flash->spi.qspi_read = qspi_read; 
+#endif
+    flash->retry.delay = retry_delay_1s;
+    flash->retry.times = 30;
     return result;
 }
 
@@ -98,9 +167,11 @@ void sfud_log_debug(const char *file, const long line, const char *format, ...) 
 
     /* args point to the first variable parameter */
     va_start(args, format);
+
     printf("[SFUD](%s:%ld) ", file, line);
     /* must use vprintf to print */
     vsnprintf(log_buf, sizeof(log_buf), format, args);
+
     printf("%s\n", log_buf);
     va_end(args);
 }

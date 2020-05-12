@@ -34,16 +34,29 @@
 #define SFUD_USING_SFDP
 
 #define SFUD_USING_FLASH_INFO_TABLE
-
+#ifdef __SAMD51__
+#define SFUD_USING_QSPI
 enum {
-    SFUD_XXXX_DEVICE_INDEX = 0,
+    SFUD_W25Q32_DEVICE_INDEX = 0,
 };
 
 #define SFUD_FLASH_DEVICE_TABLE                                                \
 {                                                                              \
-    [SFUD_XXXX_DEVICE_INDEX] = {.name = "XXXX", .spi.name = "SPIX"},           \
+    [SFUD_W25Q32_DEVICE_INDEX] = {.name = "W25Q32",.spi.name = "QSPI"},           \
 }
+#else
+enum {
+    SFUD_W25Q32_DEVICE_INDEX = 0,
+};
 
-#define SFUD_USING_QSPI
+#define SFUD_FLASH_DEVICE_TABLE                                                \
+{                                                                              \
+    [SFUD_W25Q32_DEVICE_INDEX] = {.name = "W25Q32",.spi.name = "SPI"},           \
+}
+#endif
 
+extern int chipSelectPin;
+extern unsigned long SPIclock;
+extern unsigned long QSPIclock;
+#define SFUD_W25Q32_MAX_SPEED 104000000UL
 #endif /* _SFUD_CFG_H_ */

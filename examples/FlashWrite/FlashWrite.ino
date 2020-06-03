@@ -5,10 +5,7 @@ static uint8_t sfud_demo_test_buf[SFUD_DEMO_TEST_BUFFER_SIZE] = {0xff};
 static void sfud_demo(uint32_t addr, size_t size, uint8_t *data);
 
 #define SERIAL Serial
-#ifdef ARDUINO_ARCH_SAMD
-    #undef SERIAL Serial
-    #define SERIAL SerialUSB
-#endif
+
 void setup()
 {
     SERIAL.begin(115200);
@@ -20,10 +17,9 @@ void setup()
     size_t size = sizeof(sfud_demo_test_buf);
     uint8_t result = sfud_erase_write(flash, addr, size, sfud_demo_test_buf);
     if (result == SFUD_SUCCESS) {
-    printf("Write the %s flash data finish. Start from 0x%08X, size is %ld.\r\n", flash->name, addr,
-            size);
+        SERIAL.println("Write the flash data finish");
     } else {
-    printf("Write the %s flash data failed.\r\n\r\n", flash->name);
+        SERIAL.println("Write the flash data failed");
     }
 }
 void loop()

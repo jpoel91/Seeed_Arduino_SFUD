@@ -197,7 +197,7 @@ void sfud_log_debug(const char *file, const long line, const char *format, ...) 
  */
 void sfud_log_info(const char *format, ...) {
     va_list args;
-
+    
     /* args point to the first variable parameter */
     va_start(args, format);
     printf("[SFUD]");

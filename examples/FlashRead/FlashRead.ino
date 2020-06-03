@@ -5,10 +5,7 @@ static uint8_t sfud_demo_test_buf[SFUD_DEMO_TEST_BUFFER_SIZE] = {0};
 static void sfud_demo(uint32_t addr, size_t size, uint8_t *data);
 	
 #define SERIAL Serial
-#ifdef ARDUINO_ARCH_SAMD
-    #undef SERIAL Serial
-    #define SERIAL SerialUSB
-#endif
+
 void setup()
 {
     SERIAL.begin(115200);
@@ -22,21 +19,22 @@ void setup()
     size_t size = sizeof(sfud_demo_test_buf);
     uint8_t result = sfud_read(flash, addr, size, sfud_demo_test_buf);
     if (result == SFUD_SUCCESS) {
-        printf("Read the %s flash data success. Start from 0x%08X, size is %ld. The data is:\r\n", flash->name, addr,
-                size);
-        printf("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\r\n");
-        for (size_t i = 0; i < size; i++) {
+        SERIAL.println("Read the flash data success.");
+        SERIAL.println("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\r\n");
+        for (i = 0; i < size; i++) {
             if (i % 16 == 0) {
-                printf("[%08X] ", addr + i);
+                SERIAL.print(addr + i,HEX);
+                SERIAL.print(" ");
             }
-            printf("%02X ", sfud_demo_test_buf[i]);
+            SERIAL.print(data[i],HEX);
+            SERIAL.print(" ");
             if (((i + 1) % 16 == 0) || i == size - 1) {
-                printf("\r\n");
+                SERIAL.println("");
             }
         }
-        printf("\r\n");
+        SERIAL.println(" ");
     } else {
-        printf("Read the %s flash data failed.\r\n", flash->name);
+        SERIAL.println("Read the flash data failed.");
     }
 }
 

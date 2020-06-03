@@ -21,13 +21,14 @@ void setup()
     if (result == SFUD_SUCCESS) {
         SERIAL.println("Read the flash data success.");
         SERIAL.println("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\r\n");
-        for (i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             if (i % 16 == 0) {
+                SERIAL.print("0x");
                 SERIAL.print(addr + i,HEX);
-                SERIAL.print(" ");
+                SERIAL.print("\t");
             }
-            SERIAL.print(data[i],HEX);
-            SERIAL.print(" ");
+            SERIAL.print(sfud_demo_test_buf[i],HEX);
+            SERIAL.print("\t");
             if (((i + 1) % 16 == 0) || i == size - 1) {
                 SERIAL.println("");
             }

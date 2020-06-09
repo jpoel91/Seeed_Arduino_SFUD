@@ -5,6 +5,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+void Print(const char *str);
 #ifdef SFUD_USING_QSPI
 #define QSPIDEV QSPIdev
 void QSPIBegin();

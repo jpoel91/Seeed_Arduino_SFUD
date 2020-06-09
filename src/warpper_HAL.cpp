@@ -1,6 +1,10 @@
 #include <SPI.h>
 #include "Arduino_QSPI_Hal.h"
-#include "warpper_SPI.h"
+#include "warpper_HAL.h"
+
+void Print(const char *str){
+    Serial.print(str);
+}
 
 #ifdef SFUD_USING_QSPI
 Adafruit_FlashTransport_QSPI QSPIdev;

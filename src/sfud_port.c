@@ -28,7 +28,7 @@
 
 #include <sfud.h>
 #include <stdarg.h>
-#include"warpper_SPI.h"
+#include "warpper_HAL.h"
 
 static char log_buf[256];
 
@@ -177,15 +177,15 @@ sfud_err sfud_spi_port_init(sfud_flash *flash) {
  */
 void sfud_log_debug(const char *file, const long line, const char *format, ...) {
     va_list args;
-
+    char data[100];
     /* args point to the first variable parameter */
     va_start(args, format);
-
-    printf("[SFUD](%s:%ld) ", file, line);
+    sprintf(data,"[SFUD](%s:%ld) ", file, line);
+    Print(data);
     /* must use vprintf to print */
     vsnprintf(log_buf, sizeof(log_buf), format, args);
-
-    printf("%s\n", log_buf);
+    Print(log_buf);
+    Print("\t\n");
     va_end(args);
 }
 
@@ -200,9 +200,10 @@ void sfud_log_info(const char *format, ...) {
     
     /* args point to the first variable parameter */
     va_start(args, format);
-    printf("[SFUD]");
+    Print("[SFUD]");
     /* must use vprintf to print */
     vsnprintf(log_buf, sizeof(log_buf), format, args);
-    printf("%s\n", log_buf);
+    Print(log_buf);
+    Print("\t\n");
     va_end(args);
 }

@@ -200,10 +200,12 @@ void sfud_log_info(const char *format, ...) {
     
     /* args point to the first variable parameter */
     va_start(args, format);
+#ifdef SFUD_DEBUG_MODE
     Print("[SFUD]");
     /* must use vprintf to print */
     vsnprintf(log_buf, sizeof(log_buf), format, args);
     Print(log_buf);
     Print("\t\n");
+#endif
     va_end(args);
 }

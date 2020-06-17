@@ -1,20 +1,26 @@
 #include <sfud.h>
 
 #define SFUD_DEMO_TEST_BUFFER_SIZE                     1024
+#define SFUD_DEMO_CHIP_CAPACITY                    1024
 static uint8_t sfud_demo_test_buf[SFUD_DEMO_TEST_BUFFER_SIZE];
-static void sfud_demo(uint32_t addr, size_t size, uint8_t *data);
+static int sfud_demo(uint32_t addr, size_t size, uint8_t *data);
 	
 #define SERIAL Serial
 
 void setup()
 {
+    char ret;
     SERIAL.begin(115200);
     while(!SERIAL) {};
     while(!(sfud_init() == SFUD_SUCCESS));
     #ifdef SFUD_USING_QSPI
     sfud_qspi_fast_read_enable(sfud_get_device(SFUD_W25Q32_DEVICE_INDEX), 4);
     #endif 
-    sfud_demo(0, sizeof(sfud_demo_test_buf), sfud_demo_test_buf);
+    for(int i = 0; i+=1024; i < SFUD_DEMO_CHIP_CAPACITY){
+      ret = sfud_demo(i, sizeof(sfud_demo_test_buf), sfud_demo_test_buf);
+      if (ret == -1) break;
+    }
+      
 }
 
 void loop()
@@ -28,7 +34,7 @@ void loop()
  * @param size test flash size
  * @param size test flash data buffer
  */
-static void sfud_demo(uint32_t addr, size_t size, uint8_t *data) {
+static int sfud_demo(uint32_t addr, size_t size, uint8_t *data) {
     sfud_err result = SFUD_SUCCESS;
     const sfud_flash *flash = sfud_get_device_table() + 0;
     size_t i;
@@ -42,7 +48,7 @@ static void sfud_demo(uint32_t addr, size_t size, uint8_t *data) {
         SERIAL.println("Erase the flash data finish");
     } else {
         SERIAL.println("Erase flash data failed");
-        return;
+        return -1;
     }
     /* write test */
     result = sfud_write(flash, addr, size, data);
@@ -50,7 +56,7 @@ static void sfud_demo(uint32_t addr, size_t size, uint8_t *data) {
         SERIAL.println("Write the flash data finish");
     } else {
         SERIAL.println("Write the flash data failed");
-        return;
+        return -1;
     }
     /* read test */
     size_t BaseTime = micros();

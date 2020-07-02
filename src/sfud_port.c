@@ -130,8 +130,8 @@ static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi
 }
 #endif /* SFUD_USING_QSPI */
 /*1s delay */
-static void retry_delay_10ms(void) {
-    delay(10);
+static void retry_delay_100us(void) {
+     delayMicroseconds(100);
 }
 sfud_err sfud_spi_port_init(sfud_flash *flash) {
     sfud_err result = SFUD_SUCCESS;
@@ -162,8 +162,8 @@ sfud_err sfud_spi_port_init(sfud_flash *flash) {
 #ifdef SFUD_USING_QSPI
     flash->spi.qspi_read = qspi_read; 
 #endif
-    flash->retry.delay = retry_delay_10ms;
-    flash->retry.times = 300;
+    flash->retry.delay = retry_delay_100us;
+    flash->retry.times = 1000;
     return result;
 }
 

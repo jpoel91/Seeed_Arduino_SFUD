@@ -226,7 +226,7 @@ sfud_err sfud_qspi_fast_read_enable(sfud_flash *flash, uint8_t data_line_width) 
         }
         break;
     case 4:
-        if (read_mode & QUAD_IO) {
+        if (read_mode & QUAD_IO) { 
             qspi_set_read_cmd_format(flash, SFUD_CMD_QUAD_IO_READ_DATA, 1, 4, 6, 4);
         } else if (read_mode & QUAD_OUTPUT) {
             qspi_set_read_cmd_format(flash, SFUD_CMD_QUAD_OUTPUT_READ_DATA, 1, 1, 8, 4);

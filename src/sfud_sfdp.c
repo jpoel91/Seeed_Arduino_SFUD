@@ -30,7 +30,7 @@
  * Created on: 2016-05-26
  */
 
-#include "sfud.h" 
+#include "sfud.h"
 
 /**
  * JEDEC Standard JESD216 Terms and definitions:
@@ -223,7 +223,7 @@ static bool read_basic_table(sfud_flash *flash, sfdp_para_header *basic_header) 
         return false;
     }
     /* get write granularity */
-    //TODO ĿǰΪ 1.0 ���ṩ�ķ�ʽ������֧�� V1.5 �����ϵķ�ʽ��ȡ page size
+    //TODO 目前为 1.0 所提供的方式，后期支持 V1.5 及以上的方式读取 page size
     switch ((table[0] & (0x01 << 2)) >> 2) {
     case 0:
         sfdp->write_gran = 1;

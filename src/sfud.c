@@ -226,7 +226,7 @@ sfud_err sfud_qspi_fast_read_enable(sfud_flash *flash, uint8_t data_line_width) 
         }
         break;
     case 4:
-        if (read_mode & QUAD_IO) { 
+        if (read_mode & QUAD_IO) {
             qspi_set_read_cmd_format(flash, SFUD_CMD_QUAD_IO_READ_DATA, 1, 4, 6, 4);
         } else if (read_mode & QUAD_OUTPUT) {
             qspi_set_read_cmd_format(flash, SFUD_CMD_QUAD_OUTPUT_READ_DATA, 1, 1, 8, 4);
@@ -348,14 +348,18 @@ static sfud_err hardware_init(sfud_flash *flash) {
         return result;
     }
 
-    /* I found when the flash write mode is supported AAI mode. The flash all blocks is protected,
-     * so need change the flash status to unprotected before write and erase operate. */
+    /* The flash all blocks is protected,so need change the flash status to unprotected before write and erase operate. */
     if (flash->chip.write_mode & SFUD_WM_AAI) {
         result = sfud_write_status(flash, true, 0x00);
-        if (result != SFUD_SUCCESS) {
-            return result;
+    } else {
+        /* MX25L3206E */
+        if ((0xC2 == flash->chip.mf_id) && (0x20 == flash->chip.type_id) && (0x16 == flash->chip.capacity_id)) {
+            result = sfud_write_status(flash, false, 0x00);
         }
     }
+    if (result != SFUD_SUCCESS) {
+        return result;
+    }    
 
     /* if the flash is large than 16MB (256Mb) then enter in 4-Byte addressing mode */
     if (flash->chip.capacity > (1L << 24)) {
@@ -897,7 +901,7 @@ static sfud_err set_write_enabled(const sfud_flash *flash, bool enabled) {
         if (enabled && (register_status & SFUD_STATUS_REGISTER_WEL) == 0) {
             SFUD_INFO("Error: Can't enable write status.");
             return SFUD_ERR_WRITE;
-        } else if (!enabled && (register_status & SFUD_STATUS_REGISTER_WEL) == 1) {
+        } else if (!enabled && (register_status & SFUD_STATUS_REGISTER_WEL) != 0) {
             SFUD_INFO("Error: Can't disable write status.");
             return SFUD_ERR_WRITE;
         }

@@ -12,7 +12,7 @@ void setup()
     while(!SERIAL) {};
     while(!(sfud_init() == SFUD_SUCCESS));
     #ifdef SFUD_USING_QSPI
-    sfud_qspi_fast_read_enable(sfud_get_device(SFUD_W25Q32_DEVICE_INDEX), 2);
+    sfud_qspi_fast_read_enable(sfud_get_device(SFUD_W25Q32_DEVICE_INDEX), 4);
     #endif
     const sfud_flash *flash = sfud_get_device_table() + 0;
     uint32_t addr = 0;
@@ -20,7 +20,7 @@ void setup()
     uint8_t result = sfud_read(flash, addr, size, sfud_demo_test_buf);
     if (result == SFUD_SUCCESS) {
         SERIAL.println("Read the flash data success.");
-        SERIAL.println("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\r\n");
+        SERIAL.println("Offset\t00\t01\t02\t03\t04\t05\t06\t07\t08\t09\t0A\t0B\t0C\t0D\t0E\t0F");
         for (int i = 0; i < size; i++) {
             if (i % 16 == 0) {
                 SERIAL.print("0x");

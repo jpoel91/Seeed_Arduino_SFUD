@@ -50,8 +50,8 @@ namespace fs {
        
         if (status == FR_NO_FILESYSTEM){
             BYTE work[SECTORSIZE]; /* Work area (larger is better for processing time) */
-            FRESULT ret;
-            ret = f_mkfs(_drv, FM_FAT, 0, work, sizeof(work));        
+            // FRESULT ret;
+            f_mkfs(_drv, FM_FAT, 0, work, sizeof(work));        
             status = f_mount(&root,_drv, 1);
         }
         if (status != FR_OK) {
@@ -74,7 +74,9 @@ namespace fs {
             free(flash_t);
             _pdrv = 0xFF;
         }
+        return true;
     }
+
     sfud_type_t SFUDFS::flashType() {
         if (_pdrv == 0xFF) {
             return FLASH_NONE;
@@ -98,10 +100,10 @@ namespace fs {
     }
     uint64_t SFUDFS::totalBytes() {
         FATFS* fsinfo;
-        FRESULT ret = FR_OK;
+        // FRESULT ret = FR_OK;
         DWORD free_clust;
         
-        ret = f_getfree(_drv, &free_clust, &fsinfo);
+        f_getfree(_drv, &free_clust, &fsinfo);
    
         uint64_t size = ((uint64_t)(fsinfo->csize)) * (fsinfo->n_fatent - 2)
                         #if _MAX_SS != 512
@@ -114,8 +116,8 @@ namespace fs {
     uint64_t SFUDFS::usedBytes() {
         FATFS* fsinfo;
         DWORD free_clust;
-        FRESULT ret = FR_OK;
-        ret = f_getfree(_drv, &free_clust, &fsinfo);
+        // FRESULT ret = FR_OK;
+        f_getfree(_drv, &free_clust, &fsinfo);
 
         uint64_t size = ((uint64_t)(fsinfo->csize)) * ((fsinfo->n_fatent - 2) - (fsinfo->free_clst))
                         #if _MAX_SS != 512

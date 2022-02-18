@@ -42,8 +42,6 @@ void sfud_log_debug(const char *file, const long line, const char *format, ...);
 static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, size_t write_size, uint8_t *read_buf,
         size_t read_size) {
     sfud_err result = SFUD_SUCCESS;
-    sfud_spi *spidev = (sfud_spi *)spi;
-    uint8_t send_data, read_data;
     if (write_size) {
         SFUD_ASSERT(write_buf);
     }
@@ -83,6 +81,8 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
     }
 
 #else
+    sfud_spi *spidev = (sfud_spi *)spi;
+    uint8_t send_data, read_data;
     SPICsControl(chipSelectPin, LOW);
     for (size_t i = 0, retry_times; i < write_size + read_size; i++) {
         if (i < write_size) {
@@ -111,7 +111,7 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
 static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi_read_cmd_format *qspi_read_cmd_format,
         uint8_t *read_buf, size_t read_size) {
     sfud_err result = SFUD_SUCCESS;
-    sfud_spi *spidev = (sfud_spi *)spi;
+    // sfud_spi *spidev = (sfud_spi *)spi;
     
     /**
      * add your qspi read flash data code
